@@ -1,21 +1,21 @@
 import type { BlogPost } from '@/types/blog';
 
-const API_URL = 'https://blogform.netlify.app/api/content.json';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://blogform.netlify.app/api/content.json';
 
 // Fallback mock data for development when API is unreachable
 const MOCK_DATA: BlogPost[] = [
   {
     id: "mock-1",
-    title: "Getting Started with Next.js and Cloudflare",
-    slug: "getting-started-nextjs-cloudflare",
-    content: "# Getting Started with Next.js and Cloudflare\n\nThis is a comprehensive guide to building modern web applications with Next.js and deploying them on Cloudflare Pages.\n\n## Why Next.js?\n\nNext.js provides an excellent developer experience with features like:\n\n- **Server-side rendering** for better SEO\n- **Static site generation** for optimal performance\n- **API routes** for backend functionality\n- **Built-in optimization** for images and fonts\n\n## Cloudflare Pages Benefits\n\n- Global CDN distribution\n- Automatic HTTPS\n- Git integration\n- Edge computing capabilities\n\n## Getting Started\n\n```bash\nnpx create-next-app@latest my-blog\ncd my-blog\nnpm run dev\n```\n\nThis will create a new Next.js application ready for development.",
+    title: "Getting Started with Next.js and Cloudflare Workers",
+    slug: "getting-started-nextjs-cloudflare-workers",
+    content: "# Getting Started with Next.js and Cloudflare Workers\n\nThis is a comprehensive guide to building modern web applications with Next.js and deploying them on Cloudflare Workers with ISR.\n\n## Why Next.js with Cloudflare Workers?\n\nNext.js provides an excellent developer experience with features like:\n\n- **Incremental Static Regeneration** for fresh content without redeployment\n- **Server-side rendering** for better SEO\n- **API routes** for backend functionality\n- **Built-in optimization** for images and fonts\n\n## Cloudflare Workers Benefits\n\n- Global edge distribution\n- Automatic HTTPS\n- ISR support with @cloudflare/next-on-pages\n- Edge computing capabilities\n- Fast content updates (1-2 minutes)\n\n## Getting Started\n\n```bash\nnpx create-next-app@latest my-blog\ncd my-blog\nnpm install @cloudflare/next-on-pages\nnpm run dev\n```\n\nThis will create a new Next.js application ready for Cloudflare Workers deployment with ISR support.",
     featuredImageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=400&fit=crop",
-    metaDescription: "Learn how to build and deploy modern web applications using Next.js and Cloudflare Pages with this comprehensive guide.",
-    seoTitle: "Getting Started with Next.js and Cloudflare | Professional Blog",
-    keywords: ["nextjs", "cloudflare", "web development", "deployment"],
+    metaDescription: "Learn how to build and deploy modern web applications using Next.js and Cloudflare Workers with ISR for rapid content updates.",
+    seoTitle: "Getting Started with Next.js and Cloudflare Workers | Professional Blog",
+    keywords: ["nextjs", "cloudflare", "workers", "isr", "web development"],
     author: "Professional Blog Team",
     categories: ["Web Development", "Tutorial"],
-    tags: ["nextjs", "cloudflare", "deployment", "tutorial"],
+    tags: ["nextjs", "cloudflare", "workers", "isr", "tutorial"],
     status: "published" as const,
     publishDate: "2024-01-15T10:00:00Z",
     createdAt: "2024-01-15T09:30:00Z",
@@ -109,6 +109,8 @@ export async function getAllContent(): Promise<BlogPost[]> {
         'Cache-Control': 'no-cache',
         'Accept': 'application/json',
       },
+      // Add next revalidate for ISR
+      next: { revalidate: 120 } // Revalidate every 2 minutes
     });
     
     const data = await response.json();
@@ -133,6 +135,8 @@ export async function getContentBySlug(slug: string): Promise<BlogPost | null> {
         'Cache-Control': 'no-cache',
         'Accept': 'application/json',
       },
+      // Add next revalidate for ISR
+      next: { revalidate: 120 } // Revalidate every 2 minutes
     });
     
     const data = await response.json();

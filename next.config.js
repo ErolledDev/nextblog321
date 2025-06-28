@@ -4,24 +4,34 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   
-  // Cloudflare Workers optimization
+  // Enable experimental features for Cloudflare Workers
   experimental: {
-    optimizeCss: true,
+    runtime: 'experimental-edge',
   },
   
-  // Output configuration for static export
-  output: 'export',
-  trailingSlash: true,
+  // Remove static export configuration
+  // output: 'export', // Removed for ISR support
+  // trailingSlash: true, // Removed for ISR support
   
-  // Disable image optimization for static export
+  // Configure images for Cloudflare Workers
   images: {
-    unoptimized: true,
+    loader: 'custom',
+    loaderFile: './lib/image-loader.js',
     domains: [
       'firebasestorage.googleapis.com',
       'images.unsplash.com',
       'cdn.jsdelivr.net',
-      'via.placeholder.com'
+      'via.placeholder.com',
+      'api.dicebear.com'
     ]
+  },
+  
+  // Optimize for edge runtime
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = [...(config.externals || []), 'canvas', 'jsdom'];
+    }
+    return config;
   },
 };
 

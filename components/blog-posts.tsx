@@ -16,39 +16,51 @@ import {
 import { EnhancedBlogCard } from '@/components/enhanced-blog-card';
 import type { BlogPost } from '@/types/blog';
 
-export function BlogPosts() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
+interface BlogPostsProps {
+  initialPosts?: BlogPost[];
+}
+
+export function BlogPosts({ initialPosts = [] }: BlogPostsProps) {
+  const [posts, setPosts] = useState<BlogPost[]>(initialPosts);
+  const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>(initialPosts);
+  const [loading, setLoading] = useState(!initialPosts.length);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [categories, setCategories] = useState<string[]>([]);
 
   useEffect(() => {
-    async function fetchPosts() {
-      try {
-        const response = await fetch('https://blogform.netlify.app/api/content.json');
-        const data = await response.json();
-        const publishedPosts = data
-          .filter((post: BlogPost) => post.status === 'published')
-          .sort((a: BlogPost, b: BlogPost) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
-        
-        setPosts(publishedPosts);
-        setFilteredPosts(publishedPosts);
-        
-        // Extract unique categories with proper typing
-        const allCategories: string[] = publishedPosts.flatMap((post: BlogPost) => post.categories);
-        const uniqueCategories: string[] = Array.from(new Set(allCategories));
-        setCategories(uniqueCategories);
-      } catch (error) {
-        console.error('Error fetching posts:', error);
-      } finally {
-        setLoading(false);
+    // Only fetch if we don't have initial posts (client-side fallback)
+    if (!initialPosts.length) {
+      async function fetchPosts() {
+        try {
+          const response = await fetch('https://blogform.netlify.app/api/content.json');
+          const data = await response.json();
+          const publishedPosts = data
+            .filter((post: BlogPost) => post.status === 'published')
+            .sort((a: BlogPost, b: BlogPost) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
+          
+          setPosts(publishedPosts);
+          setFilteredPosts(publishedPosts);
+          
+          // Extract unique categories with proper typing
+          const allCategories: string[] = publishedPosts.flatMap((post: BlogPost) => post.categories);
+          const uniqueCategories: string[] = Array.from(new Set(allCategories));
+          setCategories(uniqueCategories);
+        } catch (error) {
+          console.error('Error fetching posts:', error);
+        } finally {
+          setLoading(false);
+        }
       }
-    }
 
-    fetchPosts();
-  }, []);
+      fetchPosts();
+    } else {
+      // Extract categories from initial posts
+      const allCategories: string[] = initialPosts.flatMap((post: BlogPost) => post.categories);
+      const uniqueCategories: string[] = Array.from(new Set(allCategories));
+      setCategories(uniqueCategories);
+    }
+  }, [initialPosts]);
 
   useEffect(() => {
     let filtered = posts;

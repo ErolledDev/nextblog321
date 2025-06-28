@@ -1,24 +1,25 @@
-# Professional Next.js Blog
+# Professional Next.js Blog with Cloudflare Workers & ISR
 
-A modern, professional blog built with Next.js, designed for Cloudflare Pages deployment. Features a clean, Medium-like design with dynamic content fetching and SEO optimization.
+A modern, professional blog built with Next.js and deployed on Cloudflare Workers with Incremental Static Regeneration (ISR) for rapid content updates without redeployment.
 
-## 🚀 Features
+## 🚀 Key Features
 
+- **Rapid Content Updates**: ISR with 2-minute revalidation for fresh content
 - **Modern Design**: Clean, professional interface inspired by Medium
-- **Dynamic Content**: Fetches content from external API without requiring redeployment
+- **Dynamic Content**: Fetches content from external API with automatic updates
 - **SEO Optimized**: Full SEO support with meta tags, Open Graph, and Twitter Cards
+- **Edge Performance**: Deployed on Cloudflare Workers for global distribution
 - **Responsive**: Mobile-first design that works on all devices
-- **Fast Performance**: Optimized for Cloudflare Pages with proper caching headers
 - **Search & Filter**: Built-in search and category filtering
 - **Markdown Support**: Full markdown rendering with syntax highlighting
 - **Type Safe**: Built with TypeScript for better development experience
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Next.js 13+ with App Router
+- **Framework**: Next.js 14+ with App Router and ISR
+- **Deployment**: Cloudflare Workers with @cloudflare/next-on-pages
 - **Styling**: Tailwind CSS + shadcn/ui components
 - **Content**: Markdown with react-markdown and syntax highlighting
-- **Deployment**: Cloudflare Pages
 - **Type Safety**: TypeScript
 - **Icons**: Lucide React
 
@@ -26,7 +27,8 @@ A modern, professional blog built with Next.js, designed for Cloudflare Pages de
 
 - Node.js 18+ 
 - npm or yarn
-- Cloudflare account (for deployment)
+- Cloudflare account
+- Wrangler CLI
 
 ## 🚀 Getting Started
 
@@ -56,9 +58,64 @@ A modern, professional blog built with Next.js, designed for Cloudflare Pages de
 5. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
+## 🔧 Cloudflare Workers Deployment
+
+### Prerequisites
+1. Install Wrangler CLI:
+   ```bash
+   npm install -g wrangler
+   ```
+
+2. Authenticate with Cloudflare:
+   ```bash
+   wrangler login
+   ```
+
+### Deployment Steps
+
+1. **Build for Cloudflare Workers**
+   ```bash
+   npm run pages:build
+   ```
+
+2. **Preview locally**
+   ```bash
+   npm run preview
+   ```
+
+3. **Deploy to Cloudflare Workers**
+   ```bash
+   npm run deploy
+   ```
+
+### Configuration
+
+The project uses `@cloudflare/next-on-pages` to transform Next.js for Cloudflare Workers:
+
+- **ISR Support**: Pages revalidate every 2 minutes
+- **Edge Runtime**: Optimized for Cloudflare's edge network
+- **Custom Headers**: Configured for optimal caching
+- **Environment Variables**: Managed through Wrangler
+
+## ⚡ ISR (Incremental Static Regeneration)
+
+This blog uses ISR to provide:
+
+- **Fresh Content**: Pages update every 2 minutes automatically
+- **Fast Performance**: Serves cached content while regenerating in background
+- **SEO Benefits**: Pre-rendered HTML for search engines
+- **No Downtime**: Updates happen without redeployment
+
+### How ISR Works
+
+1. **Initial Request**: Page is generated and cached
+2. **Subsequent Requests**: Served from cache instantly
+3. **Background Regeneration**: After 2 minutes, page regenerates on next request
+4. **Fresh Content**: New content appears without manual deployment
+
 ## 📝 Content API
 
-The blog fetches content from your API endpoint. The expected format is:
+The blog fetches content from your API endpoint with ISR. Expected format:
 
 ```json
 [
@@ -82,37 +139,21 @@ The blog fetches content from your API endpoint. The expected format is:
 ]
 ```
 
-## 🚀 Deployment to Cloudflare Pages
+## 🎨 Customization
 
-### Method 1: Git Integration (Recommended)
+### Changing ISR Revalidation Time
 
-1. **Push your code to GitHub/GitLab**
+Edit the `revalidate` export in pages:
 
-2. **Connect to Cloudflare Pages**
-   - Go to Cloudflare Dashboard > Pages
-   - Click "Create a project" > "Connect to Git"
-   - Select your repository
+```typescript
+// Revalidate every 60 seconds (1 minute)
+export const revalidate = 60;
 
-3. **Configure build settings**
-   - Build command: `npm run build`
-   - Build output directory: `out`
-   - Node.js version: `18.x`
+// Revalidate every 300 seconds (5 minutes)
+export const revalidate = 300;
+```
 
-4. **Set environment variables** (if needed)
-   - Add any environment variables in the Pages dashboard
-
-### Method 2: Direct Upload
-
-1. **Build the project**
-   ```bash
-   npm run build
-   ```
-
-2. **Upload the `out` directory** to Cloudflare Pages
-
-## 🔧 Configuration
-
-### Customizing the Design
+### Customizing Design
 
 - Edit `tailwind.config.ts` for theme customization
 - Modify components in `components/` directory
@@ -120,50 +161,8 @@ The blog fetches content from your API endpoint. The expected format is:
 
 ### API Configuration
 
-- Update the API URL in `lib/content.ts`
+- Update the API URL in environment variables
 - Modify the content structure in `types/blog.ts` if needed
-
-### SEO Configuration
-
-- Update meta tags in `app/layout.tsx`
-- Customize Open Graph settings for each page
-
-## 📱 Features
-
-### Search & Filtering
-- Real-time search across all content
-- Category-based filtering
-- Responsive design
-
-### Content Management
-- Automatic content fetching from API
-- Client-side updates without redeployment
-- Caching for improved performance
-
-### SEO & Performance
-- Automatic sitemap generation
-- Optimized images and assets
-- Proper meta tags and structured data
-- Cloudflare Pages optimization
-
-## 🎨 Customization
-
-### Changing Colors
-Edit the CSS variables in `app/globals.css`:
-
-```css
-:root {
-  --primary: your-color;
-  --secondary: your-color;
-  /* ... */
-}
-```
-
-### Adding New Pages
-Create new pages in the `app/` directory following Next.js App Router conventions.
-
-### Modifying Components
-All reusable components are in the `components/` directory and can be customized as needed.
 
 ## 🔍 SEO Features
 
@@ -171,17 +170,60 @@ All reusable components are in the `components/` directory and can be customized
 - Open Graph and Twitter Card support
 - Structured data for articles
 - Automatic sitemap generation
-- Optimized URLs and slugs
+- ISR for fresh content with SEO benefits
 
-## 🚦 Performance
+## 🚦 Performance Benefits
 
-- Static site generation for fast loading
-- Optimized images with Next.js Image component
-- Proper caching headers for Cloudflare
-- CSS and JavaScript optimization
-- Lazy loading for better performance
+- **ISR**: Fresh content without full rebuilds
+- **Edge Distribution**: Global Cloudflare network
+- **Optimized Caching**: Smart cache headers
+- **Pre-rendered HTML**: Better Core Web Vitals
+- **Background Updates**: No user-facing delays
 
-## 📧 Contact & Support
+## 📊 Monitoring & Analytics
+
+- Real-time logs via Wrangler
+- Cloudflare Analytics dashboard
+- Performance metrics
+- Error tracking
+
+## 🔧 Development Commands
+
+```bash
+# Development
+npm run dev                 # Start development server
+npm run build              # Build for production
+npm run lint               # Run ESLint
+
+# Cloudflare Workers
+npm run pages:build        # Build for Cloudflare Workers
+npm run preview           # Preview locally with Wrangler
+npm run deploy            # Deploy to Cloudflare Workers
+npm run cf-typegen        # Generate Cloudflare types
+```
+
+## 🌐 Environment Variables
+
+Configure in `wrangler.toml` or Cloudflare dashboard:
+
+```toml
+[vars]
+NODE_ENV = "production"
+NEXT_PUBLIC_API_URL = "https://your-api.com/content.json"
+NEXT_PUBLIC_SITE_URL = "https://your-domain.com"
+NEXT_PUBLIC_SITE_NAME = "Your Blog Name"
+```
+
+## 🚀 Benefits of This Setup
+
+1. **Rapid Updates**: Content changes appear in 1-2 minutes
+2. **Global Performance**: Cloudflare's edge network
+3. **SEO Optimized**: Pre-rendered HTML with fresh content
+4. **Cost Effective**: Efficient caching and edge computing
+5. **Developer Experience**: Modern tooling and TypeScript
+6. **Scalable**: Handles traffic spikes automatically
+
+## 📧 Support
 
 For questions or support, please check the contact page or reach out through the configured contact methods.
 
@@ -191,4 +233,4 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ---
 
-Built with ❤️ using Next.js and deployed on Cloudflare Pages.
+Built with ❤️ using Next.js, ISR, and deployed on Cloudflare Workers.
