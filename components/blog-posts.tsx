@@ -28,31 +28,32 @@ export function BlogPosts({ initialPosts = [] }: BlogPostsProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [categories, setCategories] = useState<string[]>([]);
 
+  // Move fetchPosts function outside of useEffect
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch('https://blogform.netlify.app/api/content.json');
+      const data = await response.json();
+      const publishedPosts = data
+        .filter((post: BlogPost) => post.status === 'published')
+        .sort((a: BlogPost, b: BlogPost) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
+      
+      setPosts(publishedPosts);
+      setFilteredPosts(publishedPosts);
+      
+      // Extract unique categories with proper typing
+      const allCategories: string[] = publishedPosts.flatMap((post: BlogPost) => post.categories);
+      const uniqueCategories: string[] = Array.from(new Set(allCategories));
+      setCategories(uniqueCategories);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     // Only fetch if we don't have initial posts (client-side fallback)
     if (!initialPosts.length) {
-      async function fetchPosts() {
-        try {
-          const response = await fetch('https://blogform.netlify.app/api/content.json');
-          const data = await response.json();
-          const publishedPosts = data
-            .filter((post: BlogPost) => post.status === 'published')
-            .sort((a: BlogPost, b: BlogPost) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
-          
-          setPosts(publishedPosts);
-          setFilteredPosts(publishedPosts);
-          
-          // Extract unique categories with proper typing
-          const allCategories: string[] = publishedPosts.flatMap((post: BlogPost) => post.categories);
-          const uniqueCategories: string[] = Array.from(new Set(allCategories));
-          setCategories(uniqueCategories);
-        } catch (error) {
-          console.error('Error fetching posts:', error);
-        } finally {
-          setLoading(false);
-        }
-      }
-
       fetchPosts();
     } else {
       // Extract categories from initial posts

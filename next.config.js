@@ -6,12 +6,8 @@ const nextConfig = {
   
   // Enable experimental features for Cloudflare Workers
   experimental: {
-    runtime: 'experimental-edge',
+    optimizeCss: true,
   },
-  
-  // Remove static export configuration
-  // output: 'export', // Removed for ISR support
-  // trailingSlash: true, // Removed for ISR support
   
   // Configure images for Cloudflare Workers
   images: {
