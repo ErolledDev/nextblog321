@@ -12,25 +12,26 @@ export function FeaturedPosts({ initialPosts = [] }: FeaturedPostsProps) {
   const [posts, setPosts] = useState<BlogPost[]>(initialPosts);
   const [loading, setLoading] = useState(!initialPosts.length);
 
+  // Move fetchPosts function outside of useEffect
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch('https://blogform.netlify.app/api/content.json');
+      const data = await response.json();
+      const publishedPosts = data
+        .filter((post: BlogPost) => post.status === 'published')
+        .sort((a: BlogPost, b: BlogPost) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime())
+        .slice(0, 6);
+      setPosts(publishedPosts);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     // Only fetch if we don't have initial posts (client-side fallback)
     if (!initialPosts.length) {
-      async function fetchPosts() {
-        try {
-          const response = await fetch('https://blogform.netlify.app/api/content.json');
-          const data = await response.json();
-          const publishedPosts = data
-            .filter((post: BlogPost) => post.status === 'published')
-            .sort((a: BlogPost, b: BlogPost) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime())
-            .slice(0, 6);
-          setPosts(publishedPosts);
-        } catch (error) {
-          console.error('Error fetching posts:', error);
-        } finally {
-          setLoading(false);
-        }
-      }
-
       fetchPosts();
     }
   }, [initialPosts.length]);
