@@ -14,6 +14,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { BlogPost } from '@/types/blog';
 
+// Enable ISR with 2-minute revalidation
+export const revalidate = 120;
+
 interface PostPageProps {
   params: {
     slug: string;

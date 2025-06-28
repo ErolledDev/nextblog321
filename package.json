@@ -7,8 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "wrangler deploy",
-    "dev:worker": "wrangler dev"
+    "pages:build": "npx @cloudflare/next-on-pages",
+    "preview": "npm run pages:build && wrangler pages dev",
+    "deploy": "npm run pages:build && wrangler pages deploy",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv env.d.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -74,7 +76,9 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.12",
     "@types/react-syntax-highlighter": "^15.5.13",
-    "critters": "^0.0.24"
+    "critters": "^0.0.24",
+    "vercel": "^37.14.0"
   }
 }
