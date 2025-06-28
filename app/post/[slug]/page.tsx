@@ -100,7 +100,7 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
 }
 
 export default async function PostPage({ params }: PostPageProps) {
-  let post;
+  let post: BlogPost | null = null;
   
   try {
     post = await getContentBySlug(params.slug);
@@ -118,7 +118,7 @@ export default async function PostPage({ params }: PostPageProps) {
   const currentUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://localhost:3000'}/post/${post.slug}`;
 
   const getAuthorInitials = () => {
-    return post.author
+    return post!.author
       .split(' ')
       .map(name => name.charAt(0))
       .join('')
